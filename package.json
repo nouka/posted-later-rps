@@ -2,9 +2,12 @@
   "name": "posted-later-rps",
   "version": "1.0.0",
   "main": "index.js",
+  "homepage": "https://nouka.github.io/posted-later-rps",
   "scripts": {
     "start": "NODE_ENV=development webpack serve",
-    "build": "NODE_ENV=production webpack"
+    "build": "NODE_ENV=production webpack",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "devDependencies": {
     "@babel/core": "^7.22.15",
@@ -16,6 +19,7 @@
     "css-loader": "^6.8.1",
     "cssnano": "^6.0.1",
     "file-loader": "^6.2.0",
+    "gh-pages": "^6.1.0",
     "html-loader": "^4.2.0",
     "html-webpack-plugin": "^5.5.3",
     "mini-css-extract-plugin": "^2.7.6",
