@@ -71,18 +71,60 @@ async function main() {
     runningMode: 'VIDEO'
   })
 
-  // カメラ映像をvideoにアタッチ
-  const stream = await navigator.mediaDevices.getUserMedia({
-    audio: false,
-    video: true
-  })
-  video.srcObject = stream
-  video.onloadedmetadata = async () => {
-    // ビデオを再生
-    video.play()
+  /**
+   * スタートボタン押下時の処理
+   */
+  startButton.onclick = async (e: MouseEvent) => {
+    // カメラ映像をvideoにアタッチ
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: {
+          facingMode: 'user'
+        }
+      })
+      video.srcObject = stream
+      video.onloadedmetadata = async () => {
+        // ビデオを再生
+        video.play()
 
-    // ビデオ映像のロードが完了したらループ処理スタート
-    await tick(0)
+        // ビデオ映像のロードが完了したらループ処理スタート
+        await tick(0)
+
+        // 初期化
+        init()
+
+        // スタート画面非表示
+        notStartedScreen.classList.remove('flex')
+        notStartedScreen.classList.add('hidden')
+
+        // ローディング画面表示
+        readyScreen.classList.remove('hidden')
+        readyScreen.classList.add('flex')
+
+        // スタート
+        state.currentState = Status.START
+      }
+    } catch (e) {
+      console.error(e)
+      return
+    }
+  }
+
+  /**
+   * やり直しボタン押下時の処理
+   */
+  restartButton.onclick = (e: MouseEvent) => {
+    // 結果画面非表示
+    completedScreen.classList.remove('flex')
+    completedScreen.classList.add('hidden')
+
+    // スタート画面表示
+    notStartedScreen.classList.remove('hidden')
+    notStartedScreen.classList.add('flex')
+
+    // ステートを戻す
+    state.currentState = Status.NOT_STARTED
   }
 
   // 最終更新時間
@@ -103,41 +145,6 @@ async function main() {
     draw(context2D, pref)
 
     window.requestAnimationFrame(tick)
-  }
-
-  /**
-   * スタートボタン押下時の処理
-   */
-  startButton.onclick = (e: MouseEvent) => {
-    // 初期化
-    init()
-
-    // スタート画面非表示
-    notStartedScreen.classList.remove('flex')
-    notStartedScreen.classList.add('hidden')
-
-    // ローディング画面表示
-    readyScreen.classList.remove('hidden')
-    readyScreen.classList.add('flex')
-
-    // スタート
-    state.currentState = Status.START
-  }
-
-  /**
-   * やり直しボタン押下時の処理
-   */
-  restartButton.onclick = (e: MouseEvent) => {
-    // 結果画面非表示
-    completedScreen.classList.remove('flex')
-    completedScreen.classList.add('hidden')
-
-    // スタート画面表示
-    notStartedScreen.classList.remove('hidden')
-    notStartedScreen.classList.add('flex')
-
-    // ステートを戻す
-    state.currentState = Status.NOT_STARTED
   }
 
   /**
