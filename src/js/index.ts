@@ -337,7 +337,7 @@ async function main() {
   const drawVideo = (context2D: CanvasRenderingContext2D) => {
     context2D.save()
     context2D.scale(-1, 1)
-    const widthRetio = canvas.width <= 640 ? 2 : 6
+    const widthRetio = canvas.width <= 640 ? 3 : 6
     const w = canvas.width / widthRetio
     const h = (video.videoHeight / video.videoWidth) * w
     const dx = -canvas.width + w
@@ -358,7 +358,7 @@ async function main() {
     operation: 'win' | 'lose'
   ) => {
     context2D.save()
-    context2D.font = '48px Noto Sans JP sans-serif'
+    context2D.font = '48px sans-serif'
     context2D.textAlign = 'center'
     context2D.fillText(
       operation === 'win' ? '勝ってください' : '負けてください',
