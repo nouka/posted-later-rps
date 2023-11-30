@@ -13,12 +13,13 @@
   </head>
   <body>
     <div class="relative">
-      <canvas id="canvas"></canvas>
-      <div class="absolute top-0 left-0 w-screen h-screen">
-        <div
-          id="notStarted"
-          class="flex flex-col w-screen h-screen justify-center items-center"
-        >
+      <div class="absolute -z-10 top-0 left-0 w-screen h-screen">
+        <canvas id="canvas"></canvas>
+      </div>
+      <div
+        class="container mx-auto px-4 w-screen h-screen flex flex-col justify-center items-center"
+      >
+        <div id="notStarted" class="flex flex-col justify-center items-center">
           <h1 class="text-3xl mb-4">後出しジャンケンゲーム</h1>
           <p class="text-sm leading-loose mb-4">
             このアプリはカメラを使用します。<br />
@@ -32,10 +33,7 @@
             START
           </button>
         </div>
-        <div
-          id="ready"
-          class="hidden flex-col w-screen h-screen justify-center items-center"
-        >
+        <div id="ready" class="hidden flex-col justify-center items-center">
           <div
             class="relative flex flex-col w-52 h-52 justify-center items-center"
           >
@@ -55,10 +53,7 @@
             <div id="countDown" class="text-5xl">3</div>
           </div>
         </div>
-        <div
-          id="completed"
-          class="hidden flex-col w-screen h-screen justify-center items-center"
-        >
+        <div id="completed" class="hidden flex-col justify-center items-center">
           <p class="text-sm leading-loose mb-4">あなたの脳年齢は...</p>
           <p id="textScore" class="text-3xl mb-4"></p>
           <button

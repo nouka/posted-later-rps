@@ -7,6 +7,7 @@ export enum Status {
   READY, // 準備中
   ACCEPTING, // 回答受付中
   JUDGEMENT, // 判定中
+  JUDGED, // 判定完了
   FINISHED, // 回答完了
   COMPLETED // 結果表示
 }

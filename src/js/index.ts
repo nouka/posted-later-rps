@@ -266,6 +266,13 @@ async function main() {
       return
     }
 
+    // 判定完了の場合は手をおろしたら次の質問へ
+    if (state.currentState === Status.JUDGED) {
+      if (shoot === undefined) {
+        state.currentState = Status.ACCEPTING
+      }
+    }
+
     // 回答受付中でない場合は何もしない
     if (state.currentState !== Status.ACCEPTING) return
 
@@ -293,11 +300,13 @@ async function main() {
     // 判定できない場合はここで終了
     if (answer === undefined) return
 
+    // 判定中に変更
+    state.currentState = Status.JUDGEMENT
+
     // 判定できた場合はもう一度カウントアップするために更新時間を記録する
     state.lastShootUpdateAt = video.currentTime
 
     // 解答と解答時間を記録
-    state.currentState = Status.JUDGEMENT
     state.answers.push({ answer, timestamp })
     await sleep(1000)
 
@@ -317,7 +326,26 @@ async function main() {
 
     // 次の問題を準備
     state.question = undefined
-    state.currentState = Status.ACCEPTING
+    state.currentState = Status.JUDGED
+  }
+
+  /**
+   * Videoを描画
+   *
+   * @param context2D
+   */
+  const drawVideo = (context2D: CanvasRenderingContext2D) => {
+    context2D.save()
+    context2D.scale(-1, 1)
+    const widthRetio = canvas.width <= 640 ? 2 : 6
+    const w = canvas.width / widthRetio
+    const h = (video.videoHeight / video.videoWidth) * w
+    const dx = -canvas.width + w
+    const dy = canvas.height - h
+    const dw = -w
+    const dh = h
+    context2D.drawImage(video, dx, dy, dw, dh)
+    context2D.restore()
   }
 
   /**
@@ -425,19 +453,15 @@ async function main() {
   ): void => {
     // 画面をクリア
     context2D.clearRect(0, 0, canvas.width, canvas.height)
+
     // Videoを表示
-    const w = canvas.width / 6
-    const h = (video.videoHeight / video.videoWidth) * w
-    context2D.drawImage(video, canvas.width - w, canvas.height - h, w, h)
+    drawVideo(context2D)
 
-    // 未スタートの場合は何もしない
-    if (state.currentState === Status.NOT_STARTED) {
-      // TODO 未スタート画面の表示
-      return
-    }
-
-    // スタート時は何もしない
-    if (state.currentState === Status.START) {
+    // 未スタート、スタート時は何もしない
+    if (
+      state.currentState === Status.NOT_STARTED ||
+      state.currentState === Status.START
+    ) {
       return
     }
 
@@ -464,8 +488,11 @@ async function main() {
       return
     }
 
-    // 判定中
-    if (state.currentState === Status.JUDGEMENT) {
+    // 判定中、判定完了の場合
+    if (
+      state.currentState === Status.JUDGEMENT ||
+      state.currentState === Status.JUDGED
+    ) {
       if (state.question) {
         // 問題の指示
         drawQuestion(context2D, state.question.operation)
