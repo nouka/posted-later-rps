@@ -205,25 +205,19 @@ async function main() {
   const calculateScore = (answers: Answer[]): number => {
     // 初期スコア
     let score = 0
-    // 前回の解答時間
-    let lastTimestamp = 0
     // スコア計算
     answers.map((answer) => {
       // 問題数に応じて加点スコアを計算、全問正解で100
       let addScore = answer.answer ? maxScore / questionCount : 0
-      // 前回の解答からの経過時間
-      const diff = answer.timestamp - lastTimestamp
-      if (diff > 3000) {
-        // 3秒以上で半分
+      if (answer.timestamp > 1.5) {
+        // 1.5秒以上で半分
         addScore -= maxScore / questionCount / 2
-      } else if (diff > 5000) {
-        // 5秒以上で0
+      } else if (answer.timestamp > 3) {
+        // 3秒以上で0
         addScore = 0
       }
       // スコア加点
       score += addScore
-      // 前回解答時間の更新
-      lastTimestamp = answer.timestamp
     })
     return score
   }
@@ -231,6 +225,8 @@ async function main() {
   let lastCountAt: number | undefined = undefined
   let counter: number | undefined = undefined
   let diff: number = 0
+
+  let startAt: number = 0
 
   /**
    * アップデート処理
@@ -261,6 +257,7 @@ async function main() {
         readyScreen.classList.add('hidden')
 
         // 受付中に更新
+        startAt = timestamp
         state.currentState = Status.ACCEPTING
       }
       return
@@ -269,6 +266,7 @@ async function main() {
     // 判定完了の場合は手をおろしたら次の質問へ
     if (state.currentState === Status.JUDGED) {
       if (shoot === undefined) {
+        startAt = timestamp
         state.currentState = Status.ACCEPTING
       }
     }
@@ -307,7 +305,7 @@ async function main() {
     state.lastShootUpdateAt = video.currentTime
 
     // 解答と解答時間を記録
-    state.answers.push({ answer, timestamp })
+    state.answers.push({ answer, timestamp: timestamp - startAt })
     await sleep(1000)
 
     // 最終問題の場合は結果画面
@@ -319,6 +317,7 @@ async function main() {
 
       // 結果画面表示
       state.currentState = Status.FINISHED
+      console.debug({ score: state.score, answers: state.answers })
       await sleep(3000)
       state.currentState = Status.COMPLETED
       return
@@ -351,6 +350,7 @@ async function main() {
   /**
    * 質問を描画
    *
+   * @param context2D
    * @param operation
    */
   const drawQuestion = (
@@ -399,6 +399,20 @@ async function main() {
       default:
         break
     }
+    context2D.restore()
+  }
+
+  /**
+   * 進捗を描画
+   *
+   * @param context2D
+   * @param count
+   */
+  const drawProgress = (context2D: CanvasRenderingContext2D, count: number) => {
+    context2D.save()
+    context2D.font = '24px sans-serif'
+    context2D.textAlign = 'left'
+    context2D.fillText(`${count} / ${questionCount}`, 10, canvas.height - 10)
     context2D.restore()
   }
 
@@ -485,6 +499,9 @@ async function main() {
 
       // ユーザーの手
       drawHand(context2D, state.shoot)
+
+      // 進捗
+      drawProgress(context2D, state.answers.length)
       return
     }
 
@@ -502,6 +519,9 @@ async function main() {
 
       // ユーザーの手
       drawHand(context2D, state.lastShoot)
+
+      // 進捗
+      drawProgress(context2D, state.answers.length)
 
       // 回答
       drawAnswer(context2D, state.answers)
