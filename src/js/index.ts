@@ -55,8 +55,8 @@ async function main() {
     './assets/scissors.jpg',
     './assets/paper.jpg'
   ])
-  const imageWidth = rock.width
-  const imageHeight = rock.height
+  const imageWidth = min([canvas.width / 2, rock.width]) ?? rock.width
+  const imageHeight = (rock.height / rock.width) * imageWidth
 
   // ジェスチャー認識モデルをロード
   const vision = await FilesetResolver.forVisionTasks(
